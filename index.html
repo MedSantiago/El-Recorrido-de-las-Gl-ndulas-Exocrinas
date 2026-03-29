@@ -1,0 +1,154 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Juego de Tablero – Glándulas Exocrinas</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- CONFIG -->
+  <div id="pantalla-config">
+    <div class="config-card">
+      <h1>🧬 Juego de Tablero</h1>
+      <p class="subtitulo">Glándulas Exocrinas — Actividad Universitaria Interactiva</p>
+      <div class="config-section">
+        <h3>Nombre de los Grupos</h3>
+        <div id="config-grupos"></div>
+      </div>
+      <div class="config-section">
+        <h3>Configuración de Partida</h3>
+        <div class="rondas-input">
+          <label for="max-rondas">Número máximo de rondas:</label>
+          <input type="number" id="max-rondas" min="1" max="50" value="10" />
+        </div>
+      </div>
+      <button class="btn-iniciar" onclick="iniciarJuego()">🚀 Iniciar Juego</button>
+    </div>
+  </div>
+
+  <!-- PANTALLA JUEGO -->
+  <div id="pantalla-juego">
+    <div id="header">
+      <div class="header-titulo">🧬 El Recorrido de las Glándulas Exocrinas</div>
+      <div class="header-turno">
+        <span id="turno-emoji">🔵</span>
+        <span id="turno-nombre">—</span>
+        <span id="ronda-info">Ronda 1</span>
+      </div>
+    </div>
+
+    <div id="zona-tablero">
+      <div id="tablero"></div>
+    </div>
+
+    <div id="panel-inferior">
+      <div class="panel-bloque" id="bloque-dado">
+        <h3>Dado</h3>
+        <div id="dado-display">⚅</div>
+        <div id="resultado-dado"></div>
+        <div id="cuenta-regresiva"></div>
+        <button id="btn-dado" onclick="lanzarDado()" disabled>🎲 Lanzar Dado</button>
+      </div>
+      <div class="panel-bloque">
+        <h3>Marcador en Vivo</h3>
+        <div id="marcador-container"></div>
+      </div>
+      <div class="panel-bloque">
+        <div id="control-marcador"></div>
+      </div>
+      <div class="panel-bloque" id="bloque-log">
+        <h3>Registro de Eventos</h3>
+        <div id="evento-log"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: PREGUNTA -->
+  <div class="modal-overlay" id="modal-pregunta">
+    <div class="modal-box">
+      <div class="mp-header">
+        <div>
+          <div class="mp-titulo">Pregunta de <span id="mp-titulo-valor"></span> puntos</div>
+          <div id="mp-valor"></div>
+        </div>
+        <div class="mp-timer-box">
+          <span class="mp-timer-label">⏱</span>
+          <span id="mp-timer">35</span>
+        </div>
+      </div>
+      <span id="mp-grupo"></span>
+      <div id="mp-condicion"></div>
+      <div id="mp-pregunta">—</div>
+      <div class="mp-revelar">
+        <button class="btn-revelar" id="btn-mostrar-pista" onclick="mostrarPista()">💡 Ver Pista</button>
+        <button class="btn-revelar" onclick="mostrarRespuesta()">📖 Ver Respuesta Esperada</button>
+      </div>
+      <div id="mp-pista-container" style="display:none;">
+        <div class="mp-detalle-label">Pista</div>
+        <div class="mp-detalle-box" id="mp-pista"></div>
+      </div>
+      <div id="mp-respuesta-container" style="display:none; margin-top:8px;">
+        <div class="mp-detalle-label">Respuesta Esperada</div>
+        <div class="mp-detalle-box" id="mp-respuesta"></div>
+      </div>
+      <div class="mp-calificar" style="margin-top:16px;">
+        <h4>Calificar Respuesta</h4>
+        <div class="btns-calificacion">
+          <button class="btn-cal correcta" id="btn-cal-correcta" onclick="calificarRespuesta(this)" data-valor="0" data-grupo="0">
+            <span class="cal-nombre">✅ Correcta</span><span class="cal-puntos">+0 pts</span>
+          </button>
+          <button class="btn-cal parcial" id="btn-cal-parcial" onclick="calificarRespuesta(this)" data-valor="0" data-grupo="0">
+            <span class="cal-nombre">🟡 Parcial</span><span class="cal-puntos">+0 pts</span>
+          </button>
+          <button class="btn-cal neutra" id="btn-cal-neutra" onclick="calificarRespuesta(this)" data-valor="0" data-grupo="0">
+            <span class="cal-nombre">⬜ Neutra</span><span class="cal-puntos">0 pts</span>
+          </button>
+          <button class="btn-cal breve" id="btn-cal-breve" onclick="calificarRespuesta(this)" data-valor="0" data-grupo="0">
+            <span class="cal-nombre">🔶 Muy Breve</span><span class="cal-puntos">-0 pts</span>
+          </button>
+          <button class="btn-cal incorrecta" id="btn-cal-incorrecta" onclick="calificarRespuesta(this)" data-valor="0" data-grupo="0">
+            <span class="cal-nombre">❌ Incorrecta</span><span class="cal-puntos">-0 pts</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: BENEFICIO / CASTIGO -->
+  <div class="modal-overlay" id="modal-especial">
+    <div class="modal-box" style="max-width:480px; text-align:center;">
+      <div class="especial-icono" id="modal-especial-icono">🎴</div>
+      <div id="modal-especial-titulo">Título</div>
+      <div id="modal-especial-grupo" style="font-size:14px;margin:4px 0 12px;font-weight:700;">Grupo</div>
+      <div id="modal-especial-nombre" style="font-size:18px;font-weight:800;margin-bottom:8px;"></div>
+      <div id="modal-especial-desc" style="color:#94A3B8;font-size:13px;line-height:1.5;margin-bottom:16px;"></div>
+      <div id="modal-especial-acciones" style="margin-bottom:12px;"></div>
+      <button class="btn-continuar" id="btn-modal-especial-continuar" onclick="cerrarModalEspecial()">Entendido — Continuar</button>
+    </div>
+  </div>
+
+  <!-- MODAL: FINAL DEL JUEGO -->
+  <div class="modal-overlay" id="modal-final">
+    <div class="modal-box" style="max-width:480px;">
+      <div class="fin-header">
+        <div class="fin-trofeo">🏆</div>
+        <div id="fin-motivo">El juego ha terminado.</div>
+      </div>
+      <div class="fin-ganador-box">
+        <div class="fin-ganador-label">Grupo Ganador</div>
+        <div id="fin-ganador">—</div>
+        <div id="fin-puntaje">—</div>
+      </div>
+      <div class="fin-ranking-titulo">Clasificación Final</div>
+      <div id="fin-ranking"></div>
+      <button class="btn-reiniciar" onclick="reiniciarJuego()">🔄 Jugar de Nuevo</button>
+    </div>
+  </div>
+
+  <script src="preguntas.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
