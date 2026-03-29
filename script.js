@@ -3,7 +3,7 @@
 // ============================================================
 
 const TIEMPO_DADO = 500;
-const TIEMPO_BASE = 50; // segundos por pregunta
+const TIEMPO_BASE = 35; // segundos por pregunta
 
 // 30 casillas de juego + inicio + final = 32 total
 const CASILLAS_CONFIG = [
@@ -63,6 +63,7 @@ let estado = {
   tiempoRestante: 0,
   // para castigo transferencia eleccion
   _castigo_transferencia_valor: 0,
+  bonoMetaOtorgado: false,
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -211,8 +212,16 @@ function moverFicha(pasos) {
 }
 
 function ejecutarCasilla(casilla, grupo) {
-  if (casilla.tipo === 'final') { terminarJuego(`¡${grupo.nombre} llegó a la casilla final!`); return; }
-  if (casilla.tipo === 'inicio') { finalizarTurno(); return; }
+if (casilla.tipo === 'final') {
+  if (!estado.bonoMetaOtorgado) {
+    grupo.puntos += 200;
+    estado.bonoMetaOtorgado = true;
+    registrarEvento(`🏁 ${grupo.nombre} llegó primero a la meta y recibió +200 pts de bonificación`, 'positivo');
+    renderizarMarcador();
+  }
+  terminarJuego(`¡${grupo.nombre} llegó primero a la casilla final!`);
+  return;
+}  if (casilla.tipo === 'inicio') { finalizarTurno(); return; }
   if (casilla.tipo === 'beneficio') { mostrarModalBeneficio(grupo); return; }
   if (casilla.tipo === 'castigo') { mostrarModalCastigo(grupo); return; }
   if (['q200','q500','q1000'].includes(casilla.tipo)) {
@@ -310,6 +319,32 @@ function iniciarTimerPregunta(segundos, valor, grupo, modoCalif, penalizacionBas
     }
   }, 1000);
 }
+
+function ajustarTiempoPregunta(cambio) {
+  const modalAbierto = document.getElementById('modal-pregunta').classList.contains('abierto');
+  if (!modalAbierto) return;
+
+  estado.tiempoRestante += cambio;
+
+  if (estado.tiempoRestante < 0) {
+    estado.tiempoRestante = 0;
+  }
+
+  const el = document.getElementById('mp-timer');
+  el.textContent = estado.tiempoRestante;
+
+  if (estado.tiempoRestante <= 10) {
+    el.classList.add('urgente');
+  } else {
+    el.classList.remove('urgente');
+  }
+
+  const grupo = estado.grupos[estado.turnoActual];
+  const textoCambio = cambio > 0 ? `+${cambio}` : `${cambio}`;
+  registrarEvento(`⏱️ Tiempo ajustado para ${grupo.nombre}: ${textoCambio} segundos`, 'info');
+}
+
+
 
 function mostrarPista() { document.getElementById('mp-pista-container').style.display = 'block'; }
 function mostrarRespuesta() { document.getElementById('mp-respuesta-container').style.display = 'block'; }
@@ -635,7 +670,20 @@ function reiniciarJuego() {
   document.getElementById('modal-final').classList.remove('abierto');
   document.getElementById('pantalla-juego').style.display = 'none';
   document.getElementById('pantalla-config').style.display = 'flex';
-  estado = { iniciado:false, turnoActual:0, rondaActual:1, maxRondas:10, grupos:[], turnosTotales:0, dadoBloqueado:false, preguntasUsadas:{200:[],500:[],1000:[]}, timerPregunta:null, tiempoRestante:0, _castigo_transferencia_valor:0 };
+ estado = {
+  iniciado: false,
+  turnoActual: 0,
+  rondaActual: 1,
+  maxRondas: 10,
+  grupos: [],
+  turnosTotales: 0,
+  dadoBloqueado: false,
+  preguntasUsadas: { 200: [], 500: [], 1000: [] },
+  timerPregunta: null,
+  tiempoRestante: 0,
+  _castigo_transferencia_valor: 0,
+  bonoMetaOtorgado: false
+};
   renderizarConfiguracion();
   renderizarTablero();
 }
