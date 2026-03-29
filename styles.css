@@ -272,6 +272,44 @@ html, body {
 .mp-titulo { font-size: 12px; font-weight: 600; color: var(--texto-muted); }
 #mp-valor { font-size: 15px; font-weight: 800; color: #FBBF24; }
 .mp-timer-box { display: flex; align-items: center; gap: 6px; background: var(--fondo-panel); border-radius: 8px; padding: 6px 12px; }
+.mp-timer-controls {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-tiempo {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: white;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+}
+
+.btn-tiempo:hover {
+  transform: translateY(-2px);
+  opacity: 0.92;
+}
+
+.btn-tiempo:active {
+  transform: scale(0.96);
+}
+
+.btn-tiempo:first-child {
+  background: linear-gradient(160deg, #16A34A, #15803D);
+  border: 1px solid #4ADE80;
+}
+
+.btn-tiempo:last-child {
+  background: linear-gradient(160deg, #DC2626, #B91C1C);
+  border: 1px solid #FCA5A5;
+}
 .mp-timer-label { font-size: 11px; color: var(--texto-muted); }
 #mp-timer { font-size: 24px; font-weight: 800; color: #22C55E; min-width: 34px; text-align: center; transition: color 0.3s; }
 #mp-timer.urgente { color: #EF4444; animation: parpadeo 0.5s infinite; }
